@@ -1,1 +1,2 @@
 pyuserinput==0.1.11
+PyYAML==5.4.1
