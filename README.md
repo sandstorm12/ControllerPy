@@ -32,7 +32,7 @@ controllerpy
 
 
 ## Urgent issues and futures
-1. [Nothing yet]
+1. Add a list of used libraries to the main readme.
 
 
 ## Issues and futures
