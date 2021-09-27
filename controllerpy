@@ -19,7 +19,7 @@ class ControllerPy(object):
     DEFAULT_MAX_SCROLL_SPEED = 2
     DEFAULT_DEAD_PERCENTAGE = .0001
     
-    CONFIG_PATH = "config.yaml"
+    CONFIG_NAME = "config.yaml"
 
     def __init__(self):
         self.event_counter = 0
@@ -32,9 +32,9 @@ class ControllerPy(object):
         self._load_parameters()
 
     def _load_parameters(self):
-        if os.path.exists(self.CONFIG_PATH):
+        if os.path.exists(self.CONFIG_NAME):
             print("Loading parameters from config.yaml...")
-            with open(self.CONFIG_PATH, 'r') as yaml_file:
+            with open(self.CONFIG_NAME, 'r') as yaml_file:
                 config = yaml.safe_load(yaml_file)
                 
                 self.mouse_sensitivity = config["mouse_sensitivity"]
@@ -42,9 +42,9 @@ class ControllerPy(object):
                 self.dead_zone = config["dead_zone"]
         else:
             print("Using default parameters...")
-            self.mouse_sensitivity = DEFAULT_MAX_MOUSE_SPEED
-            self.scroll_sensitivity = DEFAULT_MAX_SCROLL_SPEED
-            self.dead_zone = DEFAULT_DEAD_PERCENTAGE
+            self.mouse_sensitivity = self.DEFAULT_MAX_MOUSE_SPEED
+            self.scroll_sensitivity = self.DEFAULT_MAX_SCROLL_SPEED
+            self.dead_zone = self.DEFAULT_DEAD_PERCENTAGE
 
     def _initialize_joystick(self):
         joysticks = []
