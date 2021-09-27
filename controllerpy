@@ -1,0 +1,213 @@
+#!/usr/bin/python3
+
+import os
+import sys
+import time
+import math
+import yaml
+import pygame
+import traceback
+import threading
+import subprocess
+import Xlib.threaded
+
+from pymouse import PyMouse
+
+
+class ControllerPy(object):
+    DEFAULT_MAX_MOUSE_SPEED = 20
+    DEFAULT_MAX_SCROLL_SPEED = 2
+    DEFAULT_DEAD_PERCENTAGE = .0001
+    
+    CONFIG_PATH = "config.yaml"
+
+    def __init__(self):
+        self.event_counter = 0
+
+        self.previous_buttons = None
+        self.previous_axes = None
+        self.keyboard_visible = False
+        self.threads = []
+
+        self._load_parameters()
+
+    def _load_parameters(self):
+        if os.path.exists(self.CONFIG_PATH):
+            print("Loading parameters from config.yaml...")
+            with open(self.CONFIG_PATH, 'r') as yaml_file:
+                config = yaml.safe_load(yaml_file)
+                
+                self.mouse_sensitivity = config["mouse_sensitivity"]
+                self.scroll_sensitivity = config["scroll_sensitivity"]
+                self.dead_zone = config["dead_zone"]
+        else:
+            print("Using default parameters...")
+            self.mouse_sensitivity = DEFAULT_MAX_MOUSE_SPEED
+            self.scroll_sensitivity = DEFAULT_MAX_SCROLL_SPEED
+            self.dead_zone = DEFAULT_DEAD_PERCENTAGE
+
+    def _initialize_joystick(self):
+        joysticks = []
+
+        pygame.init()
+        pygame.joystick.init()
+
+        if pygame.joystick.get_count() == 0:
+            print("No controllers detected.")
+            sys.exit()
+        else:
+            for i in range(pygame.joystick.get_count()):
+                joysticks.append(pygame.joystick.Joystick(i))
+                joysticks[-1].init()
+                print(f"Found joystick {i}: ", joysticks[-1].get_name())
+
+        return joysticks
+
+    def _initialize_py_mouse(self):
+        mouse = PyMouse()
+
+        return mouse
+
+    def _read_from_joysticks(self, joysticks, mouse):
+        thread = threading.Thread(
+            target=self._mouse_event_loop, args=(mouse,)
+        )
+        thread.daemon = True
+        thread.start()
+        self.threads.append(thread)
+
+        for joystick in joysticks:
+            thread = threading.Thread(
+                target=self._joystick_event_loop, args=(joystick, mouse,)
+            )
+            thread.daemon = True
+            thread.start()
+            
+            self.threads.append(thread)
+
+    def _wait_on_threads(self):
+        for thread in self.threads:
+            thread.join()
+
+    def _joystick_event_loop(self, joystick, mouse):
+        axes = [ 0.0 ] * joystick.get_numaxes()
+        buttons = [ False ] * joystick.get_numbuttons()
+
+        keep_alive = True
+        while keep_alive:
+            try:
+                event = pygame.event.wait()
+                if event.type == pygame.QUIT:
+                    keep_alive = False
+                elif event.type == pygame.JOYAXISMOTION:
+                    axes[event.dict['axis']] = event.dict['value']
+                elif event.type in [pygame.JOYBUTTONUP, pygame.JOYBUTTONDOWN]:
+                    buttons[event.dict['button']] ^= True
+
+                self._process_event(axes, buttons, mouse)
+            except KeyboardInterrupt:
+                keep_alive = False
+
+    def _mouse_event_loop(self, mouse):
+        while True:
+            if self.previous_axes is not None:
+                self._move_mouse_x(mouse)
+                self._move_mouse_y(mouse)
+                self._move_scroll(mouse)
+
+            time.sleep(.01)
+
+    def _move_mouse_x(self, mouse):
+        if abs(self.previous_axes[0]) > self.DEFAULT_DEAD_PERCENTAGE:
+            position = mouse.position()
+            delta = self.DEFAULT_MAX_MOUSE_SPEED * (self.previous_axes[0] ** 3)
+            x = int(position[0] + delta)
+            x = max(0, x)
+            mouse.move(x, position[1])
+
+    def _move_mouse_y(self, mouse):
+        if abs(self.previous_axes[1]) > self.DEFAULT_DEAD_PERCENTAGE:
+            position = mouse.position()
+            delta = self.DEFAULT_MAX_MOUSE_SPEED * (self.previous_axes[1] ** 3)
+            y = int(position[1] + delta)
+            y = max(0, y)
+            mouse.move(position[0], y)
+
+    def _move_scroll(self, mouse):
+        if abs(self.previous_axes[4]) > self.DEFAULT_DEAD_PERCENTAGE:
+            position = mouse.position()
+            delta = self.DEFAULT_MAX_SCROLL_SPEED * (self.previous_axes[4] ** 3)
+            if delta < 0:
+                mouse.click(*position, 4, int(abs(delta)))
+            else:
+                mouse.click(*position, 5, int(abs(delta)))
+
+    def _process_event(self, axes, buttons, mouse):
+        if self.previous_buttons is None:
+            self.previous_buttons = buttons.copy()
+            self.previous_axes = axes.copy()
+
+        if buttons[0] != self.previous_buttons[0]:
+            self._left_click(buttons, mouse)
+        elif buttons[1] != self.previous_buttons[1]:
+            self._right_click(buttons, mouse)
+        elif buttons[2]:
+            self._double_left_click(buttons, mouse)
+        elif buttons[3]:
+            self._double_right_click(buttons, mouse)
+        elif buttons[7]:
+            self._toggle_keyboard()
+
+        self.previous_buttons = buttons.copy()
+        self.previous_axes = axes.copy()
+
+    def _left_click(self, buttons, mouse):
+        if buttons[0]:
+            position = mouse.position()
+            mouse.press(*position)
+        else:
+            position = mouse.position()
+            mouse.release(*position)
+
+    def _right_click(self, buttons, mouse):
+        if buttons[1]:
+            position = mouse.position()
+            mouse.press(*position, 2)
+        else:
+            position = mouse.position()
+            mouse.release(*position, 2)
+
+    def _double_left_click(self, buttons, mouse):
+        position = mouse.position()
+        mouse.click(*position)
+        time.sleep(.015)
+        position = mouse.position()
+        mouse.click(*position)
+
+    def _double_right_click(self, buttons, mouse):
+        position = mouse.position()
+        mouse.click(*position, 2)
+        time.sleep(.015)
+        position = mouse.position()
+        mouse.click(*position, 2)
+
+    def _toggle_keyboard(self):
+        if self.keyboard_visible:
+            subprocess.Popen(["pkill", "onboard"])
+            self.keyboard_visible = False
+        else:
+            subprocess.Popen("onboard")
+            self.keyboard_visible = True
+
+    def run(self):
+        joysticks = self._initialize_joystick()
+
+        mouse = self._initialize_py_mouse()
+
+        self._read_from_joysticks(joysticks, mouse)
+
+        self._wait_on_threads()
+
+
+if __name__ == "__main__":
+    ControllerPy().run()
