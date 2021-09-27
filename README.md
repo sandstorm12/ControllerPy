@@ -19,9 +19,9 @@ This is a personal project under development. All feature requests and issues an
 
 ## Installation
 ```bash
-python3 -m pip install -r requirements.txt
-
 sudo apt install onboard
+
+python3 -m pip install git+https://github.com/sandstorm12/ControllerPy.git
 ```
 
 
