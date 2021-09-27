@@ -1,9 +1,15 @@
-# ControllerMousePy
-A simple python script to control linux cursor using a controller
+# ControllerPy
+
+A python script to use a controller as mouse and keyboard.
+
+Currently only working on linux (test on ubuntu 20).
+
+For keyboard input, an on screen keyboarded name [onboard](https://launchpad.net/onboard) is used.
 
 
 ## Note
 
+This is a personal project under development. All feature requests and issues and appreciated.
 
 
 ## Comments
@@ -19,19 +25,20 @@ sudo apt install onboard
 ```
 
 
-
 ## Run
-
+```bash
+controllerpy
+```
 
 
 ## Urgent issues and futures
-
+1. [Nothing yet]
 
 
 ## Issues and futures
-
+1. Add windows support
 
 
 ## Contributors
-
+1. Hamid Mohammadi: <sandstormeatwo@gmail.com>
 
