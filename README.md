@@ -32,12 +32,15 @@ controllerpy
 
 
 ## Urgent issues and futures
-1. Add a list of used libraries to the main readme.
-2. Make config file custom and createable from cli.
+1. Add a list of used libraries to the main readme
 
 
 ## Issues and futures
 1. Add windows support
+2. Make config file custom and createable from cli
+3. Add cli interface
+4. Add version cli option
+5. List controllers using cli options
 
 
 ## Contributors
