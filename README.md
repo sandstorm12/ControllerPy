@@ -39,6 +39,7 @@ controllerpy
 2. Make the config file a system argument
 3. Add a default layout
 4. Generate default config file
+5. Test with Dual Shock controller
 
 
 ## Issues and futures
@@ -50,6 +51,8 @@ controllerpy
 6. Add vibration feedback (no pygame support)
 7. Support analog trigger
 8. Add multi-key press support
+9. Add more keyboard keys
+10. Add on start-up launch support
 
 
 ## Contributors
