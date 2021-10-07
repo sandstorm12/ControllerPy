@@ -43,6 +43,7 @@ controllerpy
 5. List controllers using cli options
 6. Add vibration feedback
 7. Support analog trigger
+8. Add multi-key press support
 
 
 ## Contributors
