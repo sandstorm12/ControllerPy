@@ -80,7 +80,7 @@ class ControllerPy(object):
         "KEYBOARD_COMMAND_DOWN": 'down_key',
         "KEYBOARD_COMMAND_LEFT": 'left_key',
         "KEYBOARD_COMMAND_RIGHT": 'right_key',
-        "KEYBOARD_COMMAND_ESCAPE": 'escape_key',
+        "KEYBOARD_COMMAND_ESC": 'escape_key',
         "KEYBOARD_SPACE": ' ',
         "KEYBOARD_LOWERCASE_A": 'a',
         "KEYBOARD_LOWERCASE_B": 'b',
