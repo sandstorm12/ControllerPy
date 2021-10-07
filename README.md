@@ -41,6 +41,7 @@ controllerpy
 3. Add cli interface
 4. Add version cli option
 5. List controllers using cli options
+6. Add vibration feedback
 
 
 ## Contributors
