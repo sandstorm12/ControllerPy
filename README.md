@@ -43,11 +43,11 @@ controllerpy
 
 ## Issues and futures
 1. Add Windows support
-2. Make config file custom and createable from cli
+2. ~~Make config file custom and createable from cli~~
 3. Add cli interface
 4. Add version cli option
 5. List controllers using cli options
-6. Add vibration feedback
+6. Add vibration feedback (no pygame support)
 7. Support analog trigger
 8. Add multi-key press support
 
