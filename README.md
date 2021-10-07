@@ -54,6 +54,7 @@ controllerpy
 9. Add more keyboard keys
 10. Add on start-up launch support
 11. Auto detect and report controller connection and disconnection
+12. Add gif to the main readme
 
 
 ## Contributors
