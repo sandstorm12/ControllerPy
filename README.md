@@ -42,6 +42,7 @@ controllerpy
 4. Add version cli option
 5. List controllers using cli options
 6. Add vibration feedback
+7. Support analog trigger
 
 
 ## Contributors
