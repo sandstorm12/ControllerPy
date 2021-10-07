@@ -26,18 +26,34 @@ python3 -m pip install git+https://github.com/sandstorm12/ControllerPy.git
 
 
 ## Run
+
+Put the config.yaml file at your current path in terminal
+
 ```bash
 controllerpy
 ```
 
 
 ## Urgent issues and futures
-1. Add a list of used libraries to the main readme.
-2. Make config file custom and createable from cli.
+1. Add a list of used libraries to the main readme
+2. Make the config file a system argument
+3. Add a default layout
+4. Generate default config file
+5. Test with Dual Shock controller
 
 
 ## Issues and futures
-1. Add windows support
+1. Add Windows support
+2. ~~Make config file custom and createable from cli~~
+3. Add cli interface
+4. Add version cli option
+5. List controllers using cli options
+6. Add vibration feedback (no pygame support)
+7. Support analog trigger
+8. Add multi-key press support
+9. Add more keyboard keys
+10. Add on start-up launch support
+11. Auto detect and report controller connection and disconnection
 
 
 ## Contributors

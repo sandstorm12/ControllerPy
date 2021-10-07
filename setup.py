@@ -10,7 +10,7 @@ def read_requirements(path='./requirements.txt'):
 
 setup(
     name="ControllerPy",
-    version="0.2.3",
+    version="1.0.0",
     author="Hamid Mohammadi",
     author_email="sandstormeatwo@gmail.com",
     description="Control mouse and keyboard input using a controller",
