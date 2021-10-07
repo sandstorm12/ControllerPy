@@ -36,7 +36,7 @@ controllerpy
 
 
 ## Issues and futures
-1. Add windows support
+1. Add Windows support
 2. Make config file custom and createable from cli
 3. Add cli interface
 4. Add version cli option
