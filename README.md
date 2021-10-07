@@ -53,6 +53,7 @@ controllerpy
 8. Add multi-key press support
 9. Add more keyboard keys
 10. Add on start-up launch support
+11. Auto detect and report controller connection and disconnection
 
 
 ## Contributors
