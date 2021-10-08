@@ -41,6 +41,7 @@ controllerpy -i config.yaml
 4. Generate default config file
 5. Test with Dual Shock controller
 6. Add GUI
+7. Test using some different controllers
 
 
 ## Issues and futures
