@@ -6,6 +6,7 @@ import time
 import math
 import yaml
 import pygame
+import argparse
 import traceback
 import threading
 import subprocess
@@ -145,25 +146,31 @@ class ControllerPy(object):
         "KEYBOARD_NUM_8": '8',
         "KEYBOARD_NUM_9": '9'
     }
-    
-    CONFIG_NAME = "config.yaml"
 
-    def __init__(self):
+    def __init__(self, config_path):
         self.event_counter = 0
 
+        self.keyboard_visible = False
+
+        self.mouse_thread = None
+        self.controller_threads = []
+        self.controllers = []
+        self.activate_threads_controllers = True
+
+        self._initialize_feilds()
+        self._initialize_pygame()
+        self._load_parameters(config_path)
+
+    def _initialize_feilds(self):
         self.previous_buttons = None
         self.previous_axes = None
         self.previous_dpads = None
         self.previous_trigger = None  # TODO: Remove this field
-        self.keyboard_visible = False
-        self.threads = []
 
-        self._load_parameters()
-
-    def _load_parameters(self):
-        if os.path.exists(self.CONFIG_NAME):
+    def _load_parameters(self, config_path):
+        if os.path.exists(config_path):
             print("Loading parameters from config.yaml...")
-            with open(self.CONFIG_NAME, 'r') as yaml_file:
+            with open(config_path, 'r') as yaml_file:
                 config = yaml.safe_load(yaml_file)
                 
                 self.mouse_sensitivity = config["mouse_sensitivity"]
@@ -171,28 +178,24 @@ class ControllerPy(object):
                 self.dead_zone = config["dead_zone"]
                 self.mapping = config["mapping"]
         else:
-            print("Using default parameters...")
+            print("No config file. Using default parameters...")
             self.mouse_sensitivity = self.DEFAULT_MAX_MOUSE_SPEED
             self.scroll_sensitivity = self.DEFAULT_MAX_SCROLL_SPEED
             self.dead_zone = self.DEFAULT_DEAD_PERCENTAGE
             # TODO: self.mapping = self._default_mapping()
 
-    def _initialize_joystick(self):
-        joysticks = []
-
+    def _initialize_pygame(self):
         pygame.init()
         pygame.joystick.init()
 
+    def _initialize_joystick(self):
         if pygame.joystick.get_count() == 0:
             print("No controllers detected.")
-            sys.exit()
         else:
             for i in range(pygame.joystick.get_count()):
-                joysticks.append(pygame.joystick.Joystick(i))
-                joysticks[-1].init()
-                print(f"Found joystick {i}: ", joysticks[-1].get_name())
-
-        return joysticks
+                self.controllers.append(pygame.joystick.Joystick(i))
+                self.controllers[-1].init()
+                print(f"Found joystick {i}: ", self.controllers[-1].get_name())
 
     def _initialize_py_mouse(self):
         mouse = PyMouse()
@@ -204,27 +207,29 @@ class ControllerPy(object):
 
         return keyboard
 
-    def _read_from_joysticks(self, joysticks, mouse, keyboard):
+    def _initialize_mouse_thread(self, mouse, keyboard):
         thread = threading.Thread(
             target=self._mouse_event_loop, args=(mouse, keyboard)
         )
         thread.daemon = True
         thread.start()
-        self.threads.append(thread)
+        self.mouse_thread = thread
 
-        for joystick in joysticks:
+    def _read_from_joysticks(self, mouse, keyboard):
+        self.activate_threads_controllers = True
+        for controller in self.controllers:
             thread = threading.Thread(
                 target=self._joystick_event_loop, args=(
-                    joystick, mouse, keyboard
+                    controller, mouse, keyboard
                 )
             )
             thread.daemon = True
             thread.start()
             
-            self.threads.append(thread)
+            self.controller_threads.append(thread)
 
-    def _wait_on_threads(self):
-        for thread in self.threads:
+    def _wait_on_controller_threads(self):
+        for thread in self.controller_threads:
             thread.join()
 
     def _joystick_event_loop(self, joystick, mouse, keyboard):
@@ -234,7 +239,7 @@ class ControllerPy(object):
         dpads = [ False ] * 4
 
         keep_alive = True
-        while keep_alive:
+        while keep_alive and self.activate_threads_controllers:
             try:
                 event = pygame.event.wait()
                 if event.type == pygame.QUIT:
@@ -391,16 +396,46 @@ class ControllerPy(object):
             subprocess.Popen("onboard")
             self.keyboard_visible = True
 
+    def _controller_check_loop():
+        pass
+
     def run(self):
-        joysticks = self._initialize_joystick()
+        self._initialize_joystick()
 
         mouse = self._initialize_py_mouse()
         keyboard = self._initialize_py_keyboard()
+        
+        self._read_from_joysticks(mouse, keyboard)
 
-        self._read_from_joysticks(joysticks, mouse, keyboard)
+        self._initialize_mouse_thread(mouse, keyboard)
 
-        self._wait_on_threads()
+        while True:
+            if pygame.joystick.get_count() != len(self.controllers):
+                self.controllers = []
+                self.controller_threads = []
+                
+                self.activate_threads_controllers = False
+                self._wait_on_controller_threads()
+
+                self._initialize_feilds()
+                self._initialize_joystick()
+                self._read_from_joysticks(mouse, keyboard)
+            else:
+                time.sleep(1)
 
 
 if __name__ == "__main__":
-    ControllerPy().run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-i', '--config_path',
+        help=(
+            'The path to config file. Can be absolute or relative.\n'
+            'Default: ./config.yaml'
+        ),
+        type=str,
+        default='./config.yaml'
+    )
+
+    args = parser.parse_args()
+
+    ControllerPy(args.config_path).run()
