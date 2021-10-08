@@ -30,7 +30,7 @@ python3 -m pip install git+https://github.com/sandstorm12/ControllerPy.git
 Put the config.yaml file at your current path in terminal
 
 ```bash
-controllerpy
+controllerpy -i config.yaml
 ```
 
 
@@ -40,6 +40,7 @@ controllerpy
 3. Add a default layout
 4. Generate default config file
 5. Test with Dual Shock controller
+6. Add GUI
 
 
 ## Issues and futures
