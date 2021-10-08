@@ -1,3 +1,4 @@
 pyuserinput==0.1.11
 PyYAML==5.4.1
 python-xlib==0.31
+argparse==1.4.0
